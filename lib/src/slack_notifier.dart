@@ -49,7 +49,7 @@ class SlackNotifier {
       );
       return response.body;
     } catch (e, st) {
-      debugPrint('Error sending slack notification: $e');
+      print('Error sending slack notification: $e');
       return '$e\n$st';
     }
   }
