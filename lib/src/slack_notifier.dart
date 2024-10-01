@@ -24,29 +24,33 @@ class SlackNotifier {
     List<Block>? blocks,
     List<Attachment>? attachments,
   }) async {
-    var webhookUrl = token.startsWith('https') ? token : 'https://hooks.slack.com/services/$token';
+    try {
+      var webhookUrl = token.startsWith('https') ? token : 'https://hooks.slack.com/services/$token';
 
-    var body = {'text': text, 'link_names': true};
-    if (channel != null) body['channel'] = channel;
-    if (iconEmoji != null) body['icon_emoji'] = iconEmoji;
-    if (iconUrl != null) body['icon_url'] = iconUrl;
-    if (username != null) body['username'] = username;
-    if (blocks != null) {
-      body['blocks'] = blocks.map((b) => b.toMap()).toList();
+      var body = {'text': text, 'link_names': true};
+      if (channel != null) body['channel'] = channel;
+      if (iconEmoji != null) body['icon_emoji'] = iconEmoji;
+      if (iconUrl != null) body['icon_url'] = iconUrl;
+      if (username != null) body['username'] = username;
+      if (blocks != null) {
+        body['blocks'] = blocks.map((b) => b.toMap()).toList();
+      }
+      if (attachments != null) {
+        body['attachments'] = attachments.map((a) => a.toMap()).toList();
+      }
+
+      final response = await http.post(
+        Uri.parse(webhookUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'accept': 'application/json',
+        },
+        body: jsonEncode(body),
+      );
+      return response.body;
+    } catch (e, st) {
+      debugPrint('Error sending slack notification: $e');
+      return '$e\n$st';
     }
-    if (attachments != null) {
-      body['attachments'] = attachments.map((a) => a.toMap()).toList();
-    }
-
-    final response = await http.post(
-      Uri.parse(webhookUrl),
-      headers: {
-        'Content-Type': 'application/json',
-        'accept': 'application/json',
-      },
-      body: jsonEncode(body),
-    );
-
-    return response.body;
   }
 }
